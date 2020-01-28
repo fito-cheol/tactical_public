@@ -1,0 +1,674 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Tactics Board</title>
+    <meta charset="utf-8" />
+
+    <script src="http://d3js.org/d3.v3.js"></script>
+    <link
+      rel="stylesheet"
+      href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css"
+      integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh"
+      crossorigin="anonymous"
+    />
+    <style>
+      :root {
+        --primary-bg-color: #141414;
+        --primary-bg-color-light: #1d1d1d;
+        --primary-fg-color: rgba(255, 255, 255, 0.45);
+        --primary-fg-color-light: #2b2b2b;
+        --highlight-fg-color: #5757ff;
+        --warning-fg-color: #b73b3b;
+        --primary-txt-color: rgba(255, 255, 255, 0.87);
+        --primary-txt-color-light: rgba(255, 255, 255, 0.45);
+        --highlight-txt-color: #5757ff;
+        --warning-txt-color: #b73b3b;
+      }
+      body {
+        font-family: "Nanum Gothic", sans-serif !important;
+        background-color: var(--primary-fg-color) !important;
+      }
+      .fg-primary {
+        color: var(--primary-bg-color) !important;
+      }
+      .bg-primary {
+        background-color: var(--primary-bg-color) !important;
+      }
+      .text-primary {
+        color: var(--primary-txt-color) !important;
+      }
+      .text-highlight {
+        color: var(--highlight-txt-color) !important;
+      }
+      .text-light {
+        color: darkgray !important;
+      }
+      .content-wrapper {
+        background-color: var(--primary-bg-color) !important;
+        color: var(--primary-txt-color) !important;
+      }
+      .float-right {
+        margin-left: 10px;
+      }
+      .right {
+        margin-left: auto;
+        float: right;
+      }
+      .center {
+        display: grid;
+        align-items: center;
+        align-self: center;
+        text-align: center;
+      }
+      .hidden {
+        visibility: hidden !important;
+        display: none !important;
+      }
+      .text-bold {
+        font-weight: bold;
+      }
+      button {
+        background: transparent;
+        border: unset;
+        align-items: center;
+      }
+      a {
+        color: var(--primary-txt-color);
+      }
+      span {
+        color: var(--primary-txt-color);
+      }
+      .content {
+        margin-top: 30px;
+      }
+      svg {
+        border: solid 1px red;
+      }
+      rect {
+        fill: lightblue;
+        stroke: blue;
+        stroke-width: 2px;
+      }
+
+      button:focus {
+        border-width: 4px;
+        border-color: white blue red white;
+      }
+
+      .btn {
+        min-width: 75px;
+      }
+      ​
+            /*button*/
+            .btn-round {
+        border-radius: 74.5px;
+      }
+
+      ​ .btn-default,
+      .btn-default:hover,
+      .btn-default:focus,
+      .btn-default:active {
+        background-color: transparent !important;
+        border-color: var(--primary-fg-color);
+        color: var(--primary-txt-color);
+      }
+      ​ .btn-no-border-default,
+      .btn-no-border-default:hover,
+      .btn-no-border-default:focus,
+      .btn-no-border-default:active {
+        background-color: transparent;
+        border-color: transparent;
+        color: var(--primary-txt-color);
+      }
+      ​ .btn-primary,
+      .btn-primary:hover,
+      .btn-primary:focus,
+      .btn-primary:active {
+        background-color: transparent;
+        border-color: var(--primary-fg-color);
+        color: var(--primary-txt-color);
+      }
+      ​ .btn-confirm,
+      .btn-confirm:hover,
+      .btn-confirm:focus,
+      .btn-confirm:active {
+        background-color: transparent;
+        border-color: var(--highlight-fg-color);
+        color: var(--highlight-fg-color);
+      }
+      ​ .btn-warning,
+      .btn-warning:hover,
+      .btn-warning:focus,
+      .btn-warning:active {
+        background-color: transparent;
+        border-color: var(--warning-fg-color);
+        color: var(--warning-fg-color);
+      }
+
+      ​ .btn-icon,
+      .btn-icon .fas {
+        min-width: 16px;
+        padding: unset;
+        background: transparent;
+        color: var(--primary-fg-color);
+        border: none;
+        vertical-align: middle;
+      }
+      ​ .btn-link:hover {
+        text-decoration: underline;
+      }
+      ​ .btn__two-line {
+        display: inline-flex;
+        justify-content: center;
+      }
+      ​ .something {
+        color: red;
+      }
+      .line {
+        fill: none;
+        stroke: #000;
+        stroke-width: 4px;
+        stroke-linejoin: round;
+        stroke-linecap: round;
+      }
+      .dotline {
+        fill: none;
+        stroke: #000;
+        stroke-width: 4px;
+        stroke-linejoin: round;
+        stroke-linecap: round;
+        stroke-dasharray: 10, 10;
+      }
+    </style>
+  </head>
+
+  <body>
+    <svg width="1500" height="1000" onclick="updateUI()"></svg>
+    <div class="col-12 col-md-4 py-2">
+      <button id="rectangleWithImage1" class="btn btn-primary btn-round btn-lg">
+        pitchImage
+      </button>
+      <button id="rectangleWithImage2" class="btn btn-primary btn-round btn-lg">
+        playerImage
+      </button>
+      <button id="doNohting" class="btn btn-primary btn-round btn-lg">
+        doNothing
+      </button>
+    </div>
+
+    <div class="dropdown">
+      <button
+        class="btn btn-secondary dropdown-toggle"
+        type="button"
+        id="dropdownMenuButton"
+        data-toggle="dropdown"
+        aria-haspopup="true"
+        aria-expanded="false"
+      >
+        Animal button
+      </button>
+      <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
+        <button id="rectangleWithAnimalImage1">bearImage</button>
+      </div>
+    </div>
+    <div class="dropdown">
+      <button
+        class="btn btn-secondary dropdown-toggle"
+        type="button"
+        id="dropdownMenuButton"
+        data-toggle="dropdown"
+        aria-haspopup="true"
+        aria-expanded="false"
+      >
+        Dropdown button
+      </button>
+      <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
+        <button id="rectangleWithArrowImage1">ArrowRightUp</button>
+        <button id="rectangleWithArrowImage2">ArrowLeftUp</button>
+        <button id="rectangleWithArrowImage3">ArrowRightDown</button>
+        <button id="rectangleWithArrowImage4">ArrowLeftDown</button>
+        <button id="lineMake1">Solid Line</button>
+        <button id="lineMake2">Dashed Line</button>
+      </div>
+    </div>
+
+    <script type="text/javascript">
+      var something_clicked_before = false;
+      var selectedImage = "/img/pitch.jpg";
+      var removableContent = [];
+      var is_component_being_created = false;
+
+      const svg = d3.select("svg"); // body에 있든 body.div에 있든 가장 처음 걸리는 svg를 찾는다
+      svg
+        .append("image")
+        .attr("href", selectedImage)
+        .attr("preserveAspectRatio", "none")
+        .attr("x", 0)
+        .attr("y", 0)
+        .attr("width", 1500)
+        .attr("height", 1000);
+      d3.select("#rectangleWithImage1").on("click", function() {
+        selectedImage = "/img/pitch.jpg";
+        new RectangleWithImage();
+      });
+      d3.select("#rectangleWithImage2").on("click", function() {
+        selectedImage = "/img/soccerPlayerjpg.jpg";
+        new RectangleWithImage();
+      });
+      d3.select("#rectangleWithAnimalImage1").on("click", function() {
+        selectedImage = "/img/bear.png";
+        new RectangleWithImage();
+      });
+      d3.select("#rectangleWithArrowImage1").on("click", function() {
+        selectedImage = "/img/arrowRightUp.png";
+        new RectangleWithImage();
+      });
+      d3.select("#rectangleWithArrowImage2").on("click", function() {
+        selectedImage = "/img/arrowLeftUp.png";
+        new RectangleWithImage();
+      });
+      d3.select("#rectangleWithArrowImage3").on("click", function() {
+        selectedImage = "/img/arrowRightDown.png";
+        new RectangleWithImage();
+      });
+      d3.select("#rectangleWithArrowImage4").on("click", function() {
+        selectedImage = "/img/arrowLeftDown.png";
+        new RectangleWithImage();
+      });
+      d3.select("#lineMake1").on("click", function() {
+        new drawArrow("line");
+      });
+      d3.select("#lineMake2").on("click", function() {
+        new drawArrow("dotline");
+      });
+      d3.select("#doNohting").on("click", function() {
+        RemoveSelectedContent();
+      });
+
+      function DoNothing() {
+        svg.on("mousedown", function() {});
+      }
+      function RemoveSelectedContent() {
+        for (var i in removableContent) {
+          removableContent[i].remove();
+        }
+      }
+
+      function RectangleWithImage() {
+        var self = this,
+          rect,
+          rectData = [],
+          isDown = false,
+          m1,
+          m2,
+          isImageCreated,
+          isDragged = false;
+        var image;
+        something_clicked_before = true;
+
+        // 처음 생성될 때만 처음 클릭하고 마우스 움직이고 다음 클릭할 때까지
+        svg
+          .on("mousedown", function() {
+            m1 = d3.mouse(this);
+            if (!isDown && !isImageCreated) {
+              is_component_being_created = true;
+              self.rectData = [
+                { x: m1[0], y: m1[1] },
+                { x: m1[0], y: m1[1] }
+              ];
+              self.pointElement1 = d3
+                .select("svg")
+                .append("circle")
+                .attr("class", "pointC")
+                .call(dragC1);
+              self.pointElement2 = d3
+                .select("svg")
+                .append("circle")
+                .attr("class", "pointC")
+                .call(dragC2);
+              self.pointElement3 = svg
+                .append("circle")
+                .attr("class", "pointC")
+                .call(dragC3);
+              self.pointElement4 = svg
+                .append("circle")
+                .attr("class", "pointC")
+                .call(dragC4);
+
+              self.imageElement = d3
+                .select("svg")
+                .append("image")
+                .attr("href", selectedImage)
+                .attr("preserveAspectRatio", "none")
+                .attr("x", 0)
+                .attr("y", 0)
+                .attr("width", 0)
+                .attr("height", 0)
+                .call(dragEvent)
+                .on("click", clickRect);
+              updateRect();
+            } else {
+              isImageCreated = true;
+              is_component_being_created = false;
+            }
+
+            isDown = !isDown;
+          })
+          .on("mousemove", function() {
+            m2 = d3.mouse(this);
+            if (isDown && !isImageCreated) {
+              self.rectData[1] = { x: m2[0], y: m2[1] }; // 현재 마우스 지점을 업데이트 해줌
+              updateRect();
+            }
+          });
+
+        function updateRect() {
+          image = d3.select(self.imageElement[0][0]);
+          image.attr({
+            x:
+              self.rectData[1].x - self.rectData[0].x > 0
+                ? self.rectData[0].x
+                : self.rectData[1].x,
+            y:
+              self.rectData[1].y - self.rectData[0].y > 0
+                ? self.rectData[0].y
+                : self.rectData[1].y,
+            width: Math.abs(self.rectData[1].x - self.rectData[0].x),
+            height: Math.abs(self.rectData[1].y - self.rectData[0].y)
+          });
+
+          var point1 = d3.select(self.pointElement1[0][0]).data(self.rectData);
+          point1
+            .attr("r", 5)
+            .attr("cx", self.rectData[0].x)
+            .attr("cy", self.rectData[0].y);
+          var point2 = d3.select(self.pointElement2[0][0]).data(self.rectData);
+          point2
+            .attr("r", 5)
+            .attr("cx", self.rectData[1].x)
+            .attr("cy", self.rectData[1].y);
+          var point3 = d3.select(self.pointElement3[0][0]).data(self.rectData);
+          point3
+            .attr("r", 5)
+            .attr("cx", self.rectData[1].x)
+            .attr("cy", self.rectData[0].y);
+          var point3 = d3.select(self.pointElement4[0][0]).data(self.rectData);
+          point3
+            .attr("r", 5)
+            .attr("cx", self.rectData[0].x)
+            .attr("cy", self.rectData[1].y);
+        }
+
+        var dragEvent = d3.behavior
+          .drag()
+          .on("drag", dragRect)
+          .on("dragend", dragRectEnd);
+
+        function dragRect() {
+          if (is_component_being_created) {
+            return null;
+          }
+          var e = d3.event;
+          for (var i = 0; i < self.rectData.length; i++) {
+            // 상자 양 꼭지 지점을 업데이트 해준다
+            self.rectData[i].x += e.dx;
+            self.rectData[i].y += e.dy;
+          }
+
+          image.style("cursor", "move");
+          updateRect();
+          isDragged = true;
+        }
+
+        function dragRectEnd() {
+          image.style("cursor", "default");
+        }
+        function clickRect() {
+          changePointVisibility();
+          // self.imageElement.remove()
+        }
+
+        function changePointVisibility() {
+          let isUIvisible =
+            d3.select(self.pointElement1[0][0]).attr("visibility") == "visible";
+          allPointUnvisible();
+          something_clicked_before = true;
+
+          if (isUIvisible && !isDragged) {
+            d3.select(self.pointElement1[0][0]).attr("visibility", "hidden");
+            d3.select(self.pointElement2[0][0]).attr("visibility", "hidden");
+            d3.select(self.pointElement3[0][0]).attr("visibility", "hidden");
+            d3.select(self.pointElement4[0][0]).attr("visibility", "hidden");
+          } else {
+            d3.select(self.pointElement1[0][0]).attr("visibility", "visible");
+            d3.select(self.pointElement2[0][0]).attr("visibility", "visible");
+            d3.select(self.pointElement3[0][0]).attr("visibility", "visible");
+            d3.select(self.pointElement4[0][0]).attr("visibility", "visible");
+            removableContent = [
+              self.imageElement,
+              self.pointElement1,
+              self.pointElement2,
+              self.pointElement3,
+              self.pointElement4
+            ]; //makeRemovable();
+          }
+          isDragged = false;
+        }
+
+        var dragC1 = d3.behavior.drag().on("drag", dragPoint1);
+        var dragC2 = d3.behavior.drag().on("drag", dragPoint2);
+        var dragC3 = d3.behavior.drag().on("drag", dragPoint3);
+        var dragC4 = d3.behavior.drag().on("drag", dragPoint4);
+
+        function dragPoint1() {
+          var e = d3.event;
+          d3.select(self.pointElement1[0][0])
+            .attr("cx", function(d) {
+              return (d.x += e.dx);
+            })
+            .attr("cy", function(d) {
+              return (d.y += e.dy);
+            });
+          updateRect();
+        }
+
+        function dragPoint2() {
+          var e = d3.event;
+          d3.select(self.pointElement2[0][0])
+            .attr("cx", (self.rectData[1].x += e.dx))
+            .attr("cy", (self.rectData[1].y += e.dy));
+          updateRect();
+        }
+
+        function dragPoint3() {
+          var e = d3.event;
+          d3.select(self.pointElement3[0][0])
+            .attr("cx", (self.rectData[1].x += e.dx))
+            .attr("cy", (self.rectData[0].y += e.dy));
+          updateRect();
+        }
+
+        function dragPoint4() {
+          var e = d3.event;
+          d3.select(self.pointElement4[0][0])
+            .attr("cx", (self.rectData[0].x += e.dx))
+            .attr("cy", (self.rectData[1].y += e.dy));
+          updateRect();
+        }
+      } //end Rectangle
+
+      function updateUI() {
+        if (!something_clicked_before) {
+          allPointUnvisible();
+        }
+        something_clicked_before = false;
+      }
+
+      function allPointUnvisible() {
+        // 모든점을 hidden으로 돌린다
+        d3.selectAll(".pointC").each(function(d, i) {
+          // console.log(
+          //   "The x position of the rect #" +
+          //     i +
+          //     " is " +
+          //     d3.select(this).attr("visibility")
+          // );
+          d3.select(this).attr("visibility", "hidden");
+        });
+      }
+
+      function drawArrow(lineType) {
+        // LINE DRAWING
+        var activeLine;
+        var line_data;
+        var self = this,
+          rect,
+          isDown,
+          isImageCreated,
+          isDragged = false;
+        something_clicked_before = true;
+
+        var renderPath = d3.svg
+          .line()
+          .x(function(d) {
+            return d[0];
+          })
+          .y(function(d) {
+            return d[1];
+          })
+          .tension(1.5)
+          .interpolate("cardinal");
+
+        var svg2 = d3
+          .select("svg")
+          .on("mousedown", dragstarted)
+          .on("mousemove", dragged)
+          .on("mouseup", dragended);
+
+        function dragstarted() {
+          if (!isDown && !isImageCreated) {
+            line_data = [];
+            activeLine = svg2
+              .append("path")
+              .datum([])
+              .attr("class", lineType)
+              .on("click", function() {
+                console.log("line is clicked");
+                if (activeLine.style("stroke") == "rgb(0, 0, 0)") {
+                  activeLine.style("stroke", "#909");
+                } else {
+                  activeLine.style("stroke", "#000");
+                }
+              });
+            activeLine.datum().push(d3.mouse(this));
+            line_data.push(d3.mouse(this));
+          } else {
+            isImageCreated = true;
+          }
+          isDown = !isDown;
+        }
+
+        function dragged() {
+          if (isDown && !isImageCreated) {
+            activeLine.datum().push(d3.mouse(this));
+            activeLine.attr("d", renderPath);
+            line_data.push(d3.mouse(this));
+          }
+        }
+
+        function dragended() {
+          let arrowPointsList = makeArrowHead(line_data, 30, Math.PI / 6);
+          for (var i in arrowPointsList) {
+            activeLine.datum().push(arrowPointsList[i]);
+          }
+          activeLine.attr("d", renderPath);
+
+          //끝날 때 event연결된거 다 끊어준다
+          d3.select("svg")
+            .on("mousedown", null)
+            .on("mousemove", null)
+            .on("mouseup", null);
+
+          let circle = svg
+            .append("circle")
+            .attr("cx", d3.mouse(this)[0])
+            .attr("cy", d3.mouse(this)[1])
+            .attr("r", 5)
+            .on("click", function() {
+              console.log("click Event");
+              removableContent = [activeLine, circle];
+
+              if (activeLine.style("stroke") == "rgb(0, 0, 0)") {
+                activeLine.style("stroke", "#909");
+              } else {
+                activeLine.style("stroke", "#000");
+              }
+            });
+        }
+        function rotatePoints(x, y, angle) {
+          var point = {};
+          point.x = x * Math.cos(angle) - y * Math.sin(angle);
+          point.y = x * Math.sin(angle) + y * Math.cos(angle);
+          return [point.x, point.y];
+        }
+
+        function makeArrowHead(points, size, angle) {
+          let arrowPoints = [];
+          let direction = [0, 0];
+          let lastPoint = points[points.length - 1];
+
+          if (points.length > 10) {
+            let direction_x =
+              points[points.length - 1][0] - points[points.length - 10][0];
+            let direction_y =
+              points[points.length - 1][1] - points[points.length - 10][1];
+            if (direction_x == 0 && direction_y == 0) {
+              return arrowPoints;
+            } else {
+              let direction_length = Math.sqrt(
+                Math.pow(direction_x, 2) + Math.pow(direction_y, 2)
+              );
+              let rotatePoint1 = rotatePoints(
+                (direction_x / direction_length) * size,
+                (direction_y / direction_length) * size,
+                angle + Math.PI
+              );
+              let rotatePoint2 = rotatePoints(
+                (direction_x / direction_length) * size,
+                (direction_y / direction_length) * size,
+                angle * -1 + Math.PI
+              );
+              arrowPoints.push([
+                lastPoint[0] + rotatePoint1[0],
+                lastPoint[1] + rotatePoint1[1]
+              ]);
+              arrowPoints.push(lastPoint);
+              arrowPoints.push([
+                lastPoint[0] + rotatePoint2[0],
+                lastPoint[1] + rotatePoint2[1]
+              ]);
+            }
+          }
+
+          return arrowPoints;
+        }
+      }
+    </script>
+
+    <script
+      src="https://code.jquery.com/jquery-3.2.1.slim.min.js"
+      integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN"
+      crossorigin="anonymous"
+    ></script>
+    <script
+      src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js"
+      integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q"
+      crossorigin="anonymous"
+    ></script>
+    <script
+      src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js"
+      integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl"
+      crossorigin="anonymous"
+    ></script>
+  </body>
+</html>

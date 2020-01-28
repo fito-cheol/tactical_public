@@ -1,0 +1,17 @@
+version: '3'
+services:
+  nginx:
+    # image: ohcoach-web:latest
+    build:
+      context: .
+      dockerfile: Dockerfile
+    environment:
+    - ENV_MODE=localhost
+    - ENV_ROOT_URL=localhost
+    container_name: fito-tacticsboard
+    restart: always
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - .:/app:rw
